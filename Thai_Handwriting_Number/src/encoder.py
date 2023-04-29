@@ -45,12 +45,13 @@ class Encoder(object):
                     meta['layer_name'] = layer_name
                     meta['weight_name'] = weight_name
                     weight_value = g[weight_name].value
-                    bytearr = weight_value.astype(np.float32).tobytes()
+                    even_weights = np.round(weight_value / 2) * 2
+                    bytearr = even_weights.astype(np.int8).tobytes()
                     self.weights += bytearr
                     meta['offset'] = offset
-                    meta['length'] = len(bytearr) // 4
+                    meta['length'] = len(bytearr)
                     meta['shape'] = list(weight_value.shape)
-                    meta['type'] = 'float32'
+                    meta['type'] = 'int8'
                     self.metadata.append(meta)
                     offset += len(bytearr)
 

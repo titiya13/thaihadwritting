@@ -5,7 +5,6 @@ import argparse
 import thainumber
 
 def predict(model_weight="model.hdf5", file=""):
-
     print("Use weight: {}".format(model_weight))
 
     input = thainumber.prepare_input(file)
@@ -14,14 +13,16 @@ def predict(model_weight="model.hdf5", file=""):
     model = model_from_json(json_string)
     model.load_weights(model_weight)
 
+    class_names = [0, 2, 4, 6, 8] # แก้ไขเพิ่ม
     result = model.predict(np.array([input]))
-    print(result)
+    print("Predicted class:", class_names[np.argmax(result)]) # แก้ไขเพิ่ม
 
     result = model.predict_proba(np.array([input]))
     print(result)
 
     result = model.predict_classes(np.array([input]))
-    print(result)
+    print("Predicted class:", class_names[result[0]]) # แก้ไขเพิ่ม
+
 
 
 if __name__ == '__main__':

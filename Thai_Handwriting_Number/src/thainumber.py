@@ -46,17 +46,19 @@ def make_dataset(data_dir = "../data/clean/", size = 28):
     for folder in os.listdir(data_dir):
         if os.path.isdir(data_dir + folder) == True:
             label = folder
-            for file in glob.glob(data_dir + folder + "/*.png"):
-                img = load_img(file, grayscale=True, target_size=(size, size))
-                img = ImageOps.invert(img)
-                x = img_to_array(img)
+            if label in ["0", "2", "4", "6", "8"]:
+                for file in glob.glob(data_dir + folder + "/*.png"):
+                    img = load_img(file, grayscale=True, target_size=(size, size))
+                    img = ImageOps.invert(img)
+                    x = img_to_array(img)
 
-                X.append(x)
-                Y.append(label)
+                    X.append(x)
+                    Y.append(label)
     X = np.asarray(X)
     Y = np.asarray(Y)
     data = {"X": X, "Y": Y};
     pickle.dump(data, open("thainumber_{}.pkl".format(size), "wb"), protocol = 2)
+
 
 def load_dataset(size = 28):
     data = pickle.load(open("thainumber_{}.pkl".format(size), "rb"))

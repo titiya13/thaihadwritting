@@ -55,7 +55,7 @@
       <div id="number_container" class="row ">
 
         <div class="col s12 l6">
-          <div class="title">เขียนเลขไทย ๑ - ๙</div>
+          <div class="title">เขียนเลขไทย ๐ ๒ ๔ ๖ ๘ </div>
           <div id="board_1" class="board"></div>
           <br /><br />
           <button id="btn_predict" class="btn" style="display: none;">Predict</button>
@@ -129,7 +129,7 @@
 
       function onBtnPredictClicked() {
         //var img = BOARD.getImg();
-
+        var allowed_digits = [0, 2, 4, 6, 8];
         var img = nj.images.read(document.querySelector('.drawing-board-canvas'));
         var gray = nj.images.rgb2gray(img);
         var resized = nj.images.resize(gray, 28, 28)
@@ -140,30 +140,55 @@
 
         result = model.predict(x);
         output = result.dataSync()
-        $('#result_prediction').html(findMax(output));
+        
+        //เพิ่ม
+        var even_output = output.filter(function (value, index) {
+          return allowed_digits.includes(index) && index % 2 == 0;
+        });
 
-        var html = '<table class="table striped"><thead><tr><th>Number</th><th>Probability (%)</th></tr><tbody>';
-        for (var i = 0; i < output.length; i++) {
-          var percent = (output[i] * 100).toFixed(2);
-          html += '<tr>';
-          html += '<td>' + i + '</td>';
-          html += '<td>' + percent + '</td>';
-          html += '</tr>';
+        var even_sum = even_output.reduce(function (accumulator, currentValue) {
+          return accumulator + currentValue;
+        }, 0);
+
+        var percentages = even_output.map(function (value) {
+          return (value / even_sum) * 100;
+        });
+        
+        var max_idx = even_output.indexOf(Math.max(...even_output));
+        var max_digit = allowed_digits[max_idx];
+        if (max_digit === 0) {
+          max_digit = 6;
         }
-        html += '</tbody></table>';
-        $('#result_info').html(html);
-      }
+      
+        $('#result_prediction').html(max_digit);
+        
+        var html = '<table class="table striped"><thead><tr><th>Number</th><th>Probability (%)</th></tr><tbody>';
+          for (var i = 0; i < even_output.length; i++) {
+            var percent = percentages[i].toFixed(2);
+            var digit = allowed_digits[i];
+            if (digit === 0) {
+              digit = 0;
+            }  
+            html += '<tr>';
+            html += '<td>' + digit + '</td>';
+            html += '<td>' + percent + '</td>';
+            html += '</tr>';
+          }
+          html += '</tbody></table>';
+          $('#result_info').html(html);
+        }
 
       function findMax(classes) {
-
         var idx = 0;
         var max = classes[0];
-        for (var i = 1; i < classes.length; i++) {
-          if (classes[i] > max) {
+        //var max = -Infinity;
+        for (var i = 0; i < classes.length; i++) {
+          if (classes[i] > max && i % 2 == 0) {
             max = classes[i];
             idx = i;
           }
         }
+        
         return idx;
       }
     </script>
